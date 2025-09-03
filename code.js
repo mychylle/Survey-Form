@@ -1,22 +1,45 @@
-function doGet(e) {
-  return HtmlService.createHtmlOutput("✅ Web App is running...");
-}
+const isGitHub = window.location.hostname.includes("github.io");
 
-function doPost(e) {
+document.getElementById("f").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  output.textContent = "Saving...";
+  output.style.color = "black";
+
+  const payload = {
+    name: document.getElementById("name").value,
+    score: document.getElementById("score").value
+  };
+
+  if (isGitHub) {
+    // Simulate saving for GitHub Pages
+    setTimeout(() => {
+      output.textContent = "✅ Data saved (mock)";
+      output.style.color = "green";
+      e.target.reset();
+    }, 500);
+    return;
+  }
+
+  // Real Apps Script POST
   try {
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    var data = JSON.parse(e.postData.contents); // Parse JSON from fetch()
+    const res = await fetch("https://script.google.com/macros/s/YOUR_APPS_SCRIPT_URL/exec", {
+      method: "POST",
+      body: JSON.stringify(payload),
+      headers: { "Content-Type": "application/json" }
+    });
 
-    // Append name, score, timestamp
-    sheet.appendRow([data.name || '', data.score || '', new Date()]);
-
-    return ContentService.createTextOutput(
-      JSON.stringify({ status: "success", message: "Data saved successfully" })
-    ).setMimeType(ContentService.MimeType.JSON);
+    const data = await res.json();
+    if (data.status === "success") {
+      output.textContent = "✅ " + data.message;
+      output.style.color = "green";
+      e.target.reset();
+    } else {
+      output.textContent = "❌ " + (data.message || "Unknown error");
+      output.style.color = "red";
+    }
 
   } catch (err) {
-    return ContentService.createTextOutput(
-      JSON.stringify({ status: "error", message: err.message })
-    ).setMimeType(ContentService.MimeType.JSON);
+    output.textContent = "❌ Error: " + err.message;
+    output.style.color = "red";
   }
-}
+});
