@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Form</title>
+  <style>
+    body { font-family: Arial; max-width: 400px; margin: 40px auto; padding: 10px; }
+    h1 { text-align: center; margin-bottom: 30px; }
+    form { display: flex; flex-direction: column; }
+    input { margin-bottom: 12px; padding: 8px; font-size: 16px; }
+    button { padding: 10px; font-size: 16px; cursor: pointer; }
+    #output { margin-top: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Form</h1>
+
+    <form id="Form">
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" required>
+
+      <label for="score">Score:</label>
+      <input type="number" id="score" name="score" min="0" max="100" required>
+
+      <button id="saveBtn" type="submit">Save Data</button>
+    </form>
+  </div>
+
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbzwhW8sSVulT7ZdeMMz_RYr_yPFO3lUTzutLOl8vRw1MLVVXo9QLpeiHxbudm9ZdXlFkg/exec"; // replace with your Apps Script Web App URL
+    const form = document.getElementById("Form");
+
+    form.addEventListener("submit", e => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const payload = {};
+      formData.forEach((value, key) => {
+        payload[key] = value;
+      });
+
+      fetch(scriptURL, {
+        method: "POST",
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.text())
+      .then(msg => {
+        alert("✅ " + msg);
+        form.reset();
+      })
+      .catch(err => console.error("Error:", err));
+    });
+  </script>
+</body>
+</html>
