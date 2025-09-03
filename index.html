@@ -1,90 +1,85 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Form Example</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        max-width: 400px;
-        margin: 40px auto;
-        padding: 10px;
-      }
-      h1 {
-        text-align: center;
-        margin-bottom: 30px;
-      }
-      form {
-        display: flex;
-        flex-direction: column;
-      }
-      input {
-        margin-bottom: 12px;
-        padding: 8px;
-        font-size: 16px;
-      }
-      button {
-        padding: 10px;
-        font-size: 16px;
-        cursor: pointer;
-      }
-      #output {
-        margin-top: 20px;
-        font-weight: bold;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Form</h1>
-    <form id="f">
-      <input id="name" placeholder="Name" required>
-      <input id="score" type="number" placeholder="Score" required>
-      <button type="submit">Save Data</button>
-    </form>
+<head>
+  <meta charset="UTF-8">
+  <title>Form Example</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 400px;
+      margin: 40px auto;
+      padding: 10px;
+    }
+    h1 { text-align: center; margin-bottom: 30px; }
+    form { display: flex; flex-direction: column; }
+    input { margin-bottom: 12px; padding: 8px; font-size: 16px; }
+    button { padding: 10px; font-size: 16px; cursor: pointer; }
+    #output { margin-top: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
 
-    <div id="output"></div>
+<h1>Form</h1>
+<form id="f">
+  <input id="name" placeholder="Name" required>
+  <input id="score" type="number" placeholder="Score" required>
+  <button type="submit">Save Data</button>
+</form>
 
-    <script>
-      const output = document.getElementById("output");
+<div id="output"></div>
 
-      // Detect environment and set backend URL
-      const scriptURL = window.location.hostname.includes("github.io")
-        ? "mock_data.json"  // For GitHub Pages testing
-        : "https://script.google.com/macros/s/AKfycbx1mRACX1_Qtuj2cp65lcqPLKa0MzTM5xHezB-Q0Dsyp5JK2H4FVF3Khqhl-pZOZv4bfw/exec"; // <- Replace with your Apps Script URL
+<script>
+  const output = document.getElementById("output");
+  const isGitHub = window.location.hostname.includes("github.io");
 
-      document.getElementById("f").addEventListener("submit", async function(e) {
-        e.preventDefault();
-        output.textContent = "Saving...";
-        output.style.color = "black";
+  // Replace with your Apps Script URL
+  const scriptURL = "https://script.google.com/macros/s/AKfycbx1mRACX1_Qtuj2cp65lcqPLKa0MzTM5xHezB-Q0Dsyp5JK2H4FVF3Khqhl-pZOZv4bfw/exec";
 
-        const payload = {
-          name: document.getElementById("name").value,
-          score: document.getElementById("score").value
-        };
+  document.getElementById("f").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    output.textContent = "Saving...";
+    output.style.color = "black";
 
-        try {
-          const res = await fetch(scriptURL, {
-            method: "POST",
-            body: JSON.stringify(payload),
-            headers: { "Content-Type": "application/json" }
-          });
+    const payload = {
+      name: document.getElementById("name").value,
+      score: document.getElementById("score").value
+    };
 
-          const data = await res.json();
+    if (isGitHub) {
+      // Simulate saving on GitHub Pages
+      setTimeout(() => {
+        output.textContent = "✅ Data saved (mock)";
+        output.style.color = "green";
+        e.target.reset();
+      }, 500);
+      return;
+    }
 
-          if (data.status === "success") {
-            output.textContent = "✅ " + data.message;
-            output.style.color = "green";
-            e.target.reset(); // Clear form
-          } else {
-            output.textContent = "❌ " + (data.message || "Unknown error");
-            output.style.color = "red";
-          }
-
-        } catch (err) {
-          output.textContent = "❌ Error: " + err.message;
-          output.style.color = "red";
-        }
+    // Real Apps Script POST
+    try {
+      const res = await fetch(scriptURL, {
+        method: "POST",
+        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/json" }
       });
-    </script>
-  </body>
+
+      const data = await res.json();
+
+      if (data.status === "success") {
+        output.textContent = "✅ " + data.message;
+        output.style.color = "green";
+        e.target.reset();
+      } else {
+        output.textContent = "❌ " + (data.message || "Unknown error");
+        output.style.color = "red";
+      }
+
+    } catch (err) {
+      output.textContent = "❌ Error: " + err.message;
+      output.style.color = "red";
+    }
+  });
+</script>
+
+</body>
 </html>
